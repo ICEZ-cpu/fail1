@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif SA1 - Bahasa Indonesia Grade 9</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Merriweather (untuk teks sastra puisi/cerpen) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Kustomisasi scrollbar halus */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .option-card {
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-card:hover:not(.disabled-option) {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Sticky Top Header & Progress Bar -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <!-- Judul & Identitas Sekolah -->
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-indigo-200 shrink-0">
+                        BI
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                Grade 9 • SA1
+                            </span>
+                            <span class="text-xs text-slate-500 font-medium hidden sm:inline">
+                                Wellington Intelligence School 2026/2027
+                            </span>
+                        </div>
+                        <h1 class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight mt-0.5">
+                            Summary Exercise for SA1 - Bahasa Indonesia Grade 9
+                        </h1>
+                        <p class="text-xs text-slate-500">
+                            Kuis Interaktif Pilihan Ganda (50 Soal) dengan Auto-Score
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Statistik & Kontrol Cepat -->
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <!-- Indikator Progres -->
+                    <div class="bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 flex items-center gap-2">
+                        <span class="text-xs font-medium text-slate-600">Terjawab:</span>
+                        <span id="answered-counter" class="text-sm font-extrabold text-indigo-600">0 / 50</span>
+                    </div>
+
+                    <!-- Indikator Skor Real-time -->
+                    <div id="live-score-badge" class="bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-2">
+                        <span class="text-xs font-medium text-emerald-700">Skor:</span>
+                        <span id="live-score-value" class="text-sm font-extrabold text-emerald-700">0</span>
+                    </div>
+
+                    <!-- Toggle Mode Langsung Cek Jawaban -->
+                    <label class="inline-flex items-center gap-2 bg-amber-50 hover:bg-amber-100/80 transition px-3 py-1.5 rounded-xl border border-amber-200 cursor-pointer select-none" title="Jika aktif, jawaban langsung dikoreksi saat diklik">
+                        <input type="checkbox" id="instant-check-toggle" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-slate-300" checked>
+                        <span class="text-xs font-semibold text-amber-900">Langsung Cek Jawaban</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Progress Bar Visual -->
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-3">
+                <div id="progress-bar" class="bg-indigo-600 h-full transition-all duration-300 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Panel Floating Bacaan Pendukung (Bisa dibuka kapan saja) -->
+    <div class="fixed bottom-4 right-4 z-40 flex flex-col sm:flex-row gap-2">
+        <button onclick="openReadingModal('puisi')" class="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg shadow-purple-200 transition active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            <span>Teks Puisi (37-42)</span>
+        </button>
+        <button onclick="openReadingModal('cerpen')" class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg shadow-teal-200 transition active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>Teks Cerpen (43-50)</span>
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1">
+        
+        <!-- Kartu Identitas Siswa & Pengaturan Kuis -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                <div class="md:col-span-4">
+                    <label for="student-name" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                        Nama Lengkap Siswa
+                    </label>
+                    <input type="text" id="student-name" placeholder="Masukkan nama kamu..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+                <div class="md:col-span-3">
+                    <label for="student-class" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                        Kelas / Kelompok
+                    </label>
+                    <input type="text" id="student-class" placeholder="Contoh: Grade 9 - Grand Canyon" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+                <div class="md:col-span-5 flex flex-wrap gap-2 justify-start md:justify-end">
+                    <button onclick="shuffleAllOptions()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <span>Acak Urutan Opsi</span>
+                    </button>
+                    <button onclick="resetQuiz()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <span>Ulangi Kuis</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hasil Skor Banner (Muncul setelah tombol Selesai diklik) -->
+        <section id="result-banner" class="hidden mb-6 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-2xl text-white p-6 shadow-xl">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+                <div class="text-center lg:text-left">
+                    <span class="inline-block px-3 py-1 rounded-full bg-white/15 text-xs font-bold uppercase tracking-wider mb-2">
+                        Hasil Evaluasi Kuis SA1
+                    </span>
+                    <h2 id="result-student-greeting" class="text-2xl sm:text-3xl font-extrabold">
+                        Hasil Pengerjaan Kuis
+                    </h2>
+                    <p id="result-feedback-text" class="text-indigo-100 text-sm sm:text-base mt-1 max-w-xl">
+                        Berikut adalah rincian skor akhir dari 50 soal Summary Exercise Bahasa Indonesia Grade 9.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 sm:gap-4 w-full lg:w-auto">
+                    <div class="bg-white/15 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20">
+                        <div class="text-xs text-indigo-100 font-medium">Nilai Akhir</div>
+                        <div id="final-score-big" class="text-3xl sm:text-4xl font-black mt-1">0</div>
+                        <div class="text-[11px] text-indigo-200 mt-0.5">Skala 100</div>
+                    </div>
+                    <div class="bg-emerald-500/25 backdrop-blur-sm rounded-2xl p-4 text-center border border-emerald-300/30">
+                        <div class="text-xs text-emerald-100 font-medium">Benar</div>
+                        <div id="final-correct-count" class="text-3xl sm:text-4xl font-black text-emerald-300 mt-1">0</div>
+                        <div class="text-[11px] text-emerald-100 mt-0.5">dari 50 soal</div>
+                    </div>
+                    <div class="bg-rose-500/25 backdrop-blur-sm rounded-2xl p-4 text-center border border-rose-300/30">
+                        <div class="text-xs text-rose-100 font-medium">Salah / Kosong</div>
+                        <div id="final-wrong-count" class="text-3xl sm:text-4xl font-black text-rose-200 mt-1">0</div>
+                        <div class="text-[11px] text-rose-100 mt-0.5">perlu tinjauan</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Layout Grid: Daftar Soal (Kiri) & Navigasi Nomor Soal (Kanan Sticky) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Kolom Utama Soal (1 - 50) -->
+            <div id="questions-container" class="lg:col-span-8 space-y-5">
+                <!-- Soal-soal akan dirender oleh JavaScript di sini -->
+            </div>
+
+            <!-- Sidebar Navigasi Nomor Soal (1 - 50) -->
+            <aside class="lg:col-span-4 lg:sticky lg:top-24 space-y-4">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                            <span>Navigasi Nomor Soal</span>
+                        </h3>
+                        <span class="text-xs text-slate-500 font-medium">Klik untuk lompat</span>
+                    </div>
+
+                    <!-- Grid 50 Tombol Nomor -->
+                    <div id="nav-grid" class="grid grid-cols-10 sm:grid-cols-10 lg:grid-cols-5 xl:grid-cols-10 gap-1.5 mb-4">
+                        <!-- Tombol 1-50 dirender JS -->
+                    </div>
+
+                    <!-- Legenda Warna -->
+                    <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded bg-slate-100 border border-slate-300 inline-block"></span>
+                            <span>Belum dijawab</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded bg-indigo-600 inline-block"></span>
+                            <span>Sudah dijawab</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span>
+                            <span>Jawaban Benar</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded bg-rose-500 inline-block"></span>
+                            <span>Jawaban Salah</span>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Submit Utama di Sidebar -->
+                    <button onclick="submitQuiz()" class="w-full mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md shadow-indigo-200 transition active:scale-98 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Selesai & Lihat Skor</span>
+                    </button>
+                </div>
+
+                <!-- Ringkasan Materi Bagian -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 text-xs text-slate-600 space-y-2">
+                    <div class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Pembagian Topik Soal:</div>
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span>No. 1 – 15</span>
+                        <span class="font-semibold text-slate-800">Teks Cerpen & Majas</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span>No. 16 – 36</span>
+                        <span class="font-semibold text-slate-800">Puisi Lama, Modern & Unsur</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span>No. 37 – 42</span>
+                        <span class="font-semibold text-purple-700">Analisis Puisi "Lembar-Lembar Cerita"</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span>No. 43 – 50</span>
+                        <span class="font-semibold text-teal-700">Analisis Cerpen "Di Balik Pintu Rumah"</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Tombol Selesai di Bagian Bawah Halaman -->
+        <div class="mt-8 bg-white rounded-2xl border border-slate-200 p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+            <div>
+                <h3 class="font-bold text-slate-900 text-base">Sudah selesai mengerjakan ke-50 soal?</h3>
+                <p class="text-xs sm:text-sm text-slate-500">Klik tombol di samping untuk mengunci semua jawaban dan melihat skor akhir kamu.</p>
+            </div>
+            <button onclick="submitQuiz()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-indigo-200 transition active:scale-95 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>Periksa & Hitung Skor Akhir</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- Modal Bacaan Pendukung (Puisi / Cerpen) -->
+    <div id="reading-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+            <div id="modal-header" class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                <h3 id="modal-title" class="font-extrabold text-slate-900 text-lg">Teks Bacaan</h3>
+                <button onclick="closeReadingModal()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modal-body" class="p-6 overflow-y-auto text-slate-700 leading-relaxed">
+                <!-- Konten puisi atau cerpen dimuat di sini -->
+            </div>
+            <div class="px-6 py-3 border-t border-slate-200 bg-slate-50 flex justify-end">
+                <button onclick="closeReadingModal()" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-sm font-semibold transition">
+                    Tutup Bacaan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast / Notification Box (Pengganti alert) -->
+    <div id="toast-box" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2.5 transition-all">
+        <span id="toast-message">Pesan notifikasi</span>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. DATA BACAAN PENDUKUNG (PUISI & CERPEN SESUAI LEMBAR KERJA)
+        // =========================================================================
+        const READING_TEXTS = {
+            puisi: {
+                title: 'Puisi: "Lembar-Lembar Cerita" (Untuk Soal No. 37 – 42)',
+                html: `
+                    <div class="bg-purple-50/70 border border-purple-200 rounded-xl p-5 sm:p-6 font-serif text-slate-800 space-y-4 text-sm sm:text-base">
+                        <div class="font-sans font-bold text-purple-900 text-base sm:text-lg border-b border-purple-200 pb-2">
+                            Puisi: Lembar-Lembar Cerita
+                        </div>
+                        <div class="space-y-1">
+                            <p>Di kelas yang berisik,</p>
+                            <p class="pl-6 sm:pl-10">kita mengejar mimpi,</p>
+                            <p class="pl-12 sm:pl-20">pensil dan buku,</p>
+                            <p class="pl-16 sm:pl-28">alat perjuangan.</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p>Keringat dan tawa,</p>
+                            <p class="pl-6 sm:pl-10">pelajaran berharga,</p>
+                            <p class="pl-12 sm:pl-20">teman sejalan,</p>
+                            <p class="pl-16 sm:pl-28">di lorong-lorong harapan.</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p>Setiap ujian,</p>
+                            <p class="pl-6 sm:pl-10">kita hadapi bersama,</p>
+                            <p class="pl-12 sm:pl-20">seperti bintang di langit,</p>
+                            <p class="pl-16 sm:pl-28">bersinar dalam gelap.</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p>Dalam setiap detik,</p>
+                            <p class="pl-6 sm:pl-10">kenangan terukir,</p>
+                            <p class="pl-12 sm:pl-20">sepotong cinta,</p>
+                            <p class="pl-16 sm:pl-28">untuk ilmu dan sahabat.</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p>Suatu hari nanti,</p>
+                            <p class="pl-6 sm:pl-10">kita akan terbang,</p>
+                            <p class="pl-12 sm:pl-20">meraih cita,</p>
+                            <p class="pl-16 sm:pl-28">namun ingatlah,</p>
+                            <p class="pl-20 sm:pl-36">kita berasal dari sini.</p>
+                        </div>
+                    </div>
+                `
+            },
+            cerpen: {
+                title: 'Cerpen: "Di Balik Pintu Rumah" (Untuk Soal No. 43 – 50)',
+                html: `
+                    <div class="bg-teal-50/70 border border-teal-200 rounded-xl p-5 sm:p-6 font-serif text-slate-800 space-y-3.5 text-sm sm:text-base leading-relaxed">
+                        <div class="font-sans font-bold text-teal-900 text-base sm:text-lg border-b border-teal-200 pb-2">
+                            Cerpen: "Di Balik Pintu Rumah"
+                        </div>
+                        <p class="indent-6">
+                            <strong>(1)</strong> Di sebuah desa kecil, hiduplah sebuah keluarga sederhana: Bapak, Ibu, dan dua anak mereka, Siti dan Rudi. Setiap malam, setelah seharian bekerja di ladang, mereka berkumpul di ruang tamu yang hangat. Bapak bercerita tentang pengalamannya di ladang, sementara Ibu menyajikan hidangan sederhana yang selalu dinanti-nanti. Keluarga ini tidak memiliki banyak, tetapi mereka kaya akan cinta dan kebersamaan.
+                        </p>
+                        <p class="indent-6">
+                            <strong>(2)</strong> Suatu hari, Bapak mendapat kabar bahwa lahan mereka terkena banjir. Hati mereka tertekan, tetapi Ibu mengingatkan anak-anak untuk tetap optimis. "Kita punya satu sama lain, itu yang terpenting" katanya. Dengan semangat baru, mereka bergotong-royong membersihkan rumah dan memikirkan cara untuk memulai kembali.
+                        </p>
+                        <p class="indent-6">
+                            <strong>(3)</strong> Setelah seminggu yang sulit, ladang mereka pulih perlahan. Mereka menanam bibit baru dengan harapan yang tinggi. Setiap kali melihat tanaman tumbuh, Siti dan Rudi merasakan kebahagiaan yang mendalam. Mereka belajar bahwa meskipun hidup penuh tantangan, keluarga selalu menjadi tempat perlindungan dan dukungan.
+                        </p>
+                        <p class="indent-6">
+                            <strong>(4)</strong> Akhirnya, saat panen tiba, hasil jerih payah mereka berbuah manis. Keluarga itu berkumpul di meja, merayakan keberhasilan dengan tawa dan cerita. Dalam hati mereka, tidak ada yang lebih berharga daripada kebersamaan dan rasa syukur.
+                        </p>
+                    </div>
+                `
+            }
+        };
+
+        // =========================================================================
+        // 2. BANK 50 SOAL & KUNCI JAWABAN PERSIS DARI LEMBAR KERJA
+        // =========================================================================
+        const RAW_QUESTIONS = [
+            {
+                id: 1,
+                category: "Pengertian Cerpen",
+                question: "Cerpen (cerita pendek) adalah ...",
+                correct: "salah satu karya sastra yang berbentuk narasi singkat",
+                distractors: [
+                    "karya sastra berbait-bait yang terikat rima dan irama",
+                    "karangan nonfiksi yang memaparkan fakta sejarah secara kronologis",
+                    "teks drama yang dipentaskan melalui dialog antartokoh di panggung"
+                ]
+            },
+            {
+                id: 2,
+                category: "Sifat & Sumber Cerpen",
+                question: "Cerpen termasuk ... yang bersumber dari ...",
+                correct: "karya sastra fiksi; imajinasi pengarang",
+                distractors: [
+                    "karya ilmiah populer; hasil penelitian lapangan",
+                    "karya sastra nonfiksi; catatan harian tokoh sejarah",
+                    "laporan jurnalistik; wawancara narasumber berita"
+                ]
+            },
+            {
+                id: 3,
+                category: "Manfaat Membaca Cerpen",
+                question: "Dengan membaca banyak cerpen, kita dapat memahami beragam ... yang dapat menambah pengetahuan tentang ...",
+                correct: "karakter dan perilaku manusia; tradisi masyarakat dan nilai-nilai kemanusiaan",
+                distractors: [
+                    "rumus dan perhitungan ilmiah; perkembangan teknologi modern",
+                    "aturan tata bahasa baku; sejarah kerajaan di Nusantara",
+                    "struktur kalimat majemuk; sistem pemerintahan suatu negara"
+                ]
+            },
+            {
+                id: 4,
+                category: "Unsur Intrinsik Cerpen",
+                question: "Unsur dari dalam yang membangun cerita—meliputi tema cerita, amanat, alur cerita (plot), latar (setting), tokoh, sudut pandang (point of view), dan gaya bahasa—disebut unsur ...",
+                correct: "intrinsik cerpen",
+                distractors: [
+                    "ekstrinsik cerpen",
+                    "bibliografi pengarang",
+                    "tipografi dan rima"
+                ]
+            },
+            {
+                id: 5,
+                category: "Unsur Ekstrinsik Cerpen",
+                question: "Unsur-unsur ... cerpen yaitu unsur dari luar seperti peristiwa yang terjadi di lingkungan sekitar yang ditambahkan penulis ke dalam cerpennya.",
+                correct: "ekstrinsik",
+                distractors: [
+                    "intrinsik",
+                    "struktural",
+                    "kebahasaan"
+                ]
+            },
+            {
+                id: 6,
+                category: "Faktor Unsur Luar Cerpen",
+                question: "Unsur dari luar cerpen dipengaruhi oleh ...",
+                correct: "tempat pengarang lahir dan dibesarkan, pendidikan, dan pengetahuan pengarang",
+                distractors: [
+                    "jumlah halaman buku, jenis kertas, dan ilustrasi sampul cerita",
+                    "alur maju, latar waktu malam hari, dan dialog antartokoh",
+                    "jumlah pembaca, harga jual buku, dan penerbit cerpen"
+                ]
+            },
+            {
+                id: 7,
+                category: "Ciri-Ciri Cerpen",
+                question: "Manakah pernyataan berikut yang merupakan ciri-ciri cerpen secara tepat dan lengkap?",
+                correct: "Bersifat fiktif, jumlah kata tidak lebih dari 10.000 kata, menggunakan diksi/pilihan kata yang tidak terlalu rumit, dan hanya memiliki satu jalan cerita (alur tunggal)",
+                distractors: [
+                    "Bersifat faktual, jumlah kata lebih dari 50.000 kata, menggunakan bahasa ilmiah yang rumit, dan memiliki banyak alur bercabang",
+                    "Bersifat fiktif, terdiri atas empat baris setiap bait dengan sajak a-b-a-b, dan berisi sampiran serta isi",
+                    "Bersifat nonfiksi, jumlah kata maksimal 500 kata, dan wajib menceritakan kisah nyata tokoh pahlawan"
+                ]
+            },
+            {
+                id: 8,
+                category: "Struktur Cerpen",
+                question: "Urutan struktur cerpen yang benar dari awal hingga akhir adalah ...",
+                correct: "Abstrak (opsional) – Orientasi – Komplikasi – Evaluasi – Resolusi – Koda (opsional)",
+                distractors: [
+                    "Orientasi – Abstrak – Resolusi – Komplikasi – Koda – Evaluasi",
+                    "Komplikasi – Orientasi – Evaluasi – Abstrak – Koda – Resolusi",
+                    "Abstrak – Evaluasi – Komplikasi – Orientasi – Resolusi – Koda"
+                ]
+            },
+            {
+                id: 9,
+                category: "Cara Menulis Cerpen",
+                question: "Empat cara menulis cerpen yang menarik antara lain ...",
+                correct: "Perbanyak membaca cerpen, cari dan tentukan ide cerita yang benar-benar dikuasai, tentukan tema cerpen agar lebih terarah, dan mengembangkan alur",
+                distractors: [
+                    "Menyalin cerpen orang lain, membuat kalimat sepanjang mungkin, menghindari konflik, dan menghilangkan latar cerita",
+                    "Menentukan jumlah bait, menyusun rima a-a-a-a, mencari sampiran, dan menggunakan bahasa kuno",
+                    "Membuat daftar pustaka, melakukan wawancara mendalam, menyusun tabel data, dan menulis kesimpulan ilmiah"
+                ]
+            },
+            {
+                id: 10,
+                category: "Daya Pikat Cerpen",
+                question: "Daya pikat cerpen sangat ditentukan oleh keterampilan penulis dalam ...",
+                correct: "menyatukan unsur-unsur cerita",
+                distractors: [
+                    "memperpanjang jumlah halaman cerita",
+                    "menggunakan istilah asing di setiap kalimat",
+                    "mencantumkan biografi lengkap di awal cerita"
+                ]
+            },
+            {
+                id: 11,
+                category: "Penyajian Peristiwa Cerpen",
+                question: "Dalam menyajikan peristiwa yang menarik, gunakan ... yaitu kata-kata untuk menggambarkan apa yang dialami ...",
+                correct: "kata-kata yang ekspresif; pancaindra penulis",
+                distractors: [
+                    "kata-kata yang denotatif; kamus besar bahasa",
+                    "kalimat pasif dan baku; pembaca pertama",
+                    "istilah teknis dan ilmiah; tokoh antagonis"
+                ]
+            },
+            {
+                id: 12,
+                category: "Tahapan Penjalinan Konflik",
+                question: "Tahapan penjalinan konflik dimulai dari ... hingga konflik memuncak (...).",
+                correct: "munculnya konflik, meningkatnya konflik; klimaks",
+                distractors: [
+                    "pengenalan tokoh, penyelesaian masalah; koda",
+                    "penurunan ketegangan, resolusi akhir; antiklimaks",
+                    "abstrak cerita, orientasi latar; evaluasi"
+                ]
+            },
+            {
+                id: 13,
+                category: "Membangun Karakter Tokoh",
+                question: "Empat cara untuk membangun karakter tokoh dalam cerpen antara lain melalui ...",
+                correct: "ucapan tokoh, pemberian nama, deskripsi yang disampaikan penulis, dan pendapat tokoh lain dalam cerpen tersebut",
+                distractors: [
+                    "jumlah dialog, panjang paragraf, penggunaan tanda baca, dan ukuran huruf",
+                    "sampiran pantun, rima akhir bait, jumlah baris, dan irama pembacaan",
+                    "catatan kaki, daftar isi, sinopsis belakang buku, dan tahun terbit"
+                ]
+            },
+            {
+                id: 14,
+                category: "Jenis-Jenis Alur Cerpen",
+                question: "Alur yang berstruktur linier atau berurut dari orientasi sampai dengan resolusi disebut ..., sedangkan alur yang tahapan ceritanya dimulai dari resolusi kemudian bergerak mundur disebut ...",
+                correct: "alur maju/lurus; alur mundur/sorot balik (flashback)",
+                distractors: [
+                    "alur mundur (flashback); alur maju/lurus",
+                    "alur campuran; alur melingkar",
+                    "alur tunggal; alur ganda"
+                ]
+            },
+            {
+                id: 15,
+                category: "Majas dalam Cerpen dan Puisi",
+                question: "Majas perulangan kata atau frasa yang dianggap penting disebut ..., majas yang menghaluskan kata yang dianggap kasar disebut ..., dan majas yang merendahkan diri agar terkesan tidak sombong disebut ...",
+                correct: "repetisi; eufemisme; litotes",
+                distractors: [
+                    "hiperbola; personifikasi; simile",
+                    "litotes; repetisi; metafora",
+                    "eufemisme; hiperbola; ironi"
+                ]
+            },
+            {
+                id: 16,
+                category: "Pengertian Puisi",
+                question: "... merupakan karya sastra berisi pemikiran penulis mengenai hal apapun, dituangkan melalui kata-kata yang indah dan imajinatif.",
+                correct: "Puisi",
+                distractors: [
+                    "Cerpen",
+                    "Prosa ilmiah",
+                    "Artikel berita"
+                ]
+            },
+            {
+                id: 17,
+                category: "Jenis Puisi Berdasarkan Bentuk",
+                question: "Berdasarkan bentuknya, puisi dibedakan menjadi puisi ... dan puisi ...",
+                correct: "modern / baru; lama",
+                distractors: [
+                    "naratif; deskriptif",
+                    "lirik; epik",
+                    "fiksi; nonfiksi"
+                ]
+            },
+            {
+                id: 18,
+                category: "Puisi Baru (Modern)",
+                question: "... adalah puisi yang tidak terikat oleh aturan-aturan dalam penciptaan puisi.",
+                correct: "Puisi baru (modern)",
+                distractors: [
+                    "Puisi lama",
+                    "Gurindam",
+                    "Syair"
+                ]
+            },
+            {
+                id: 19,
+                category: "Puisi Lama",
+                question: "... adalah puisi yang masih terikat dengan aturan-aturan penciptaan puisi.",
+                correct: "Puisi lama",
+                distractors: [
+                    "Puisi baru (modern)",
+                    "Puisi bebas",
+                    "Prosa liris"
+                ]
+            },
+            {
+                id: 20,
+                category: "Contoh Puisi Lama (1)",
+                question: "Contoh puisi lama yang terdiri dari empat baris dalam satu bait, bersajak a-b-a-b, dua baris pertama disebut sampiran dan dua baris berikutnya disebut isi adalah ...",
+                correct: "pantun",
+                distractors: [
+                    "syair",
+                    "gurindam",
+                    "talibun"
+                ]
+            },
+            {
+                id: 21,
+                category: "Contoh Puisi Lama (2)",
+                question: "Contoh puisi lama yang setiap baitnya terdiri atas 2 baris, berisi sebab-akibat dan bersajak a-a adalah ...",
+                correct: "gurindam",
+                distractors: [
+                    "karmina",
+                    "seloka",
+                    "pantun"
+                ]
+            },
+            {
+                id: 22,
+                category: "Contoh Puisi Lama (3)",
+                question: "Contoh puisi lama yang disebut juga pantun berkait, berisi sindiran dan ejekan adalah ...",
+                correct: "seloka",
+                distractors: [
+                    "talibun",
+                    "syair",
+                    "gurindam"
+                ]
+            },
+            {
+                id: 23,
+                category: "Contoh Puisi Lama (4)",
+                question: "Contoh puisi lama berupa pantun yang mempunyai banyak baris berjumlah genap adalah ...",
+                correct: "talibun",
+                distractors: [
+                    "karmina",
+                    "seloka",
+                    "syair"
+                ]
+            },
+            {
+                id: 24,
+                category: "Contoh Puisi Lama (5)",
+                question: "Contoh puisi lama yang terdiri dari empat baris dalam satu bait dengan sajak a-a-a-a adalah ...",
+                correct: "syair",
+                distractors: [
+                    "pantun",
+                    "gurindam",
+                    "karmina"
+                ]
+            },
+            {
+                id: 25,
+                category: "Contoh Puisi Lama (6)",
+                question: "Contoh puisi lama yang disebut juga pantun kilat berisi 2 baris, yaitu sampiran dan isi, serta bersajak a-a adalah ...",
+                correct: "karmina",
+                distractors: [
+                    "gurindam",
+                    "talibun",
+                    "seloka"
+                ]
+            },
+            {
+                id: 26,
+                category: "Aturan Penciptaan Puisi",
+                question: "Aturan penciptaan puisi lama mencakup ...",
+                correct: "persajakan, pengaturan larik dalam setiap bait, jumlah kata dalam larik, dan musikalitas",
+                distractors: [
+                    "alur maju, latar tempat, penokohan, dan sudut pandang orang pertama",
+                    "orientasi, komplikasi, evaluasi, dan resolusi cerita",
+                    "abstrak, daftar pustaka, catatan kaki, dan kesimpulan"
+                ]
+            },
+            {
+                id: 27,
+                category: "Mengeksplorasi Puisi",
+                question: "Cara mengeksplorasi puisi yaitu dengan mengidentifikasi ... dan ... serta membuat ...",
+                correct: "unsur intrinsik; ekstrinsik; parafrasa",
+                distractors: [
+                    "sampiran; isi; pantun kilat",
+                    "tokoh utama; tokoh pendamping; sinopsis",
+                    "kalimat langsung; kalimat tidak langsung; dialog"
+                ]
+            },
+            {
+                id: 28,
+                category: "Pengertian Parafrasa",
+                question: "... adalah mengubah bahasa yang terdapat pada puisi menjadi prosa dengan mengubah bentuk puisi yang berbait-bait ke dalam prosa yang berupa ...",
+                correct: "Parafrasa; paragraf-paragraf",
+                distractors: [
+                    "Antologi; bait-bait",
+                    "Tipografi; larik-larik",
+                    "Revisi; dialog-dialog"
+                ]
+            },
+            {
+                id: 29,
+                category: "Cara Memparafrasa Puisi",
+                question: "Cara memparafrasa sebuah puisi yaitu dengan ... yang sengaja dihilangkan dan ...",
+                correct: "menambahkan kata-kata; mencari makna dari kata-kata konotatif",
+                distractors: [
+                    "menghapus seluruh tanda baca; mengubah rima menjadi a-a-a-a",
+                    "memotong bait puisi; mengganti nama penyair",
+                    "menghilangkan kata hubung; menyusun baris menjadi sampiran"
+                ]
+            },
+            {
+                id: 30,
+                category: "Unsur Intrinsik Puisi",
+                question: "Unsur intrinsik puisi terdiri atas ... dan ...",
+                correct: "unsur fisik; unsur batin",
+                distractors: [
+                    "unsur biografi; unsur sosial",
+                    "orientasi; komplikasi",
+                    "sampiran; isi"
+                ]
+            },
+            {
+                id: 31,
+                category: "Unsur Fisik Puisi",
+                question: "... berupa sarana yang digunakan oleh penyair untuk mengungkapkan hakikat puisi.",
+                correct: "Unsur fisik",
+                distractors: [
+                    "Unsur batin",
+                    "Unsur ekstrinsik",
+                    "Amanat puisi"
+                ]
+            },
+            {
+                id: 32,
+                category: "Unsur Batin Puisi",
+                question: "... merupakan unsur yang berkaitan dengan batin dalam puisi.",
+                correct: "Unsur batin",
+                distractors: [
+                    "Unsur fisik",
+                    "Tipografi puisi",
+                    "Persajakan"
+                ]
+            },
+            {
+                id: 33,
+                category: "Makna Puisi",
+                question: "Makna puisi sering disebut ... (menyerupai prisma) yang dapat menimbulkan banyak makna atau penafsiran.",
+                correct: "prismatis",
+                distractors: [
+                    "denotatif",
+                    "monoton",
+                    "harfiah"
+                ]
+            },
+            {
+                id: 34,
+                category: "Pengeditan & Revisi Puisi",
+                question: "... yang sudah dituliskan berkenaan dengan aspek bahasa, salah ketik, penggantian kata, kalimat, dan tata tulis, sedangkan ... berkenaan dengan penggantian isi atau substansi.",
+                correct: "Pengeditan puisi; revisi",
+                distractors: [
+                    "Revisi; pengeditan puisi",
+                    "Parafrasa; antologi",
+                    "Tipografi; musikalitas"
+                ]
+            },
+            {
+                id: 35,
+                category: "Antologi Puisi",
+                question: "... adalah buku yang berisikan kumpulan puisi yang biasanya memiliki kesamaan tema atau momen tertentu.",
+                correct: "Antologi",
+                distractors: [
+                    "Biografi",
+                    "Ensiklopedia",
+                    "Parafrasa"
+                ]
+            },
+            {
+                id: 36,
+                category: "Penyair Terkenal",
+                question: "Beberapa contoh penyair (penulis puisi) terkenal yaitu ...",
+                correct: "Taufiq Ismail, Joko Pinurbo, Kahlil Gibran",
+                distractors: [
+                    "B.J. Habibie, Ki Hajar Dewantara, Soekarno",
+                    "Albert Einstein, Isaac Newton, Nikola Tesla",
+                    "Raden Ajeng Kartini, Cut Nyak Dien, Pattimura"
+                ]
+            },
+            // SOAL 37 - 42 (TERKAIT PUISI "LEMBAR-LEMBAR CERITA")
+            {
+                id: 37,
+                category: "Analisis Puisi: Lembar-Lembar Cerita",
+                showReading: "puisi",
+                question: "Berdasarkan bentuknya, puisi \"Lembar-Lembar Cerita\" di atas termasuk ...",
+                correct: "puisi modern",
+                distractors: [
+                    "puisi lama",
+                    "pantun berkait (seloka)",
+                    "syair klasik"
+                ]
+            },
+            {
+                id: 38,
+                category: "Analisis Puisi: Lembar-Lembar Cerita",
+                question: "Unsur fisik puisi yang unik pada puisi \"Lembar-Lembar Cerita\" di atas yaitu ...",
+                correct: "tipografi",
+                distractors: [
+                    "sampiran dan isi",
+                    "rima a-a-a-a",
+                    "gurindam dua baris"
+                ]
+            },
+            {
+                id: 39,
+                category: "Analisis Puisi: Lembar-Lembar Cerita",
+                question: "Alasan yang tepat mengapa puisi \"Lembar-Lembar Cerita\" termasuk puisi modern (terkait soal nomor 37–38) adalah ...",
+                correct: "karena puisi tersebut tidak terikat pada aturan penciptaan puisi",
+                distractors: [
+                    "karena setiap baitnya wajib bersajak a-b-a-b dan memiliki sampiran",
+                    "karena ditulis pada masa kerajaan kuno dan anonim",
+                    "karena jumlah kata dalam setiap lariknya harus tepat empat kata"
+                ]
+            },
+            {
+                id: 40,
+                category: "Analisis Puisi: Lembar-Lembar Cerita",
+                question: "Tema puisi \"Lembar-Lembar Cerita\" tersebut adalah ...",
+                correct: "sekolah / menuntut ilmu",
+                distractors: [
+                    "bencana banjir di desa",
+                    "keindahan alam pegunungan",
+                    "perjuangan melawan penjajah"
+                ]
+            },
+            {
+                id: 41,
+                category: "Analisis Puisi: Lembar-Lembar Cerita",
+                question: "Amanat yang ingin disampaikan penyair melalui puisi \"Lembar-Lembar Cerita\" adalah ...",
+                correct: "Sekolah adalah tempat di mana kita belajar dan membentuk karakter kita; ingatlah bahwa meskipun kita telah meraih cita-cita, sekolah adalah fondasi yang akan selalu kita bawa dalam perjalanan hidup.",
+                distractors: [
+                    "Jangan pernah melupakan kampung halaman dan ladang pertanian yang telah menghidupi keluarga sejak kecil.",
+                    "Ujian sekolah adalah beban berat yang harus dihindari agar masa muda tetap terasa menyenangkan.",
+                    "Persahabatan di kelas hanya bersifat sementara dan akan hilang setelah kita lulus sekolah."
+                ]
+            },
+            {
+                id: 42,
+                category: "Analisis Puisi: Lembar-Lembar Cerita",
+                question: "Majas yang terdapat pada puisi \"Lembar-Lembar Cerita\" beserta maknanya yang tepat adalah ...",
+                correct: "Personifikasi: \"Kita mengejar mimpi\" (menggambarkan usaha untuk mencapai impian) dan Simile: \"Seperti bintang di langit\" (membandingkan teman-teman yang saling memberikan dukungan)",
+                distractors: [
+                    "Litotes: \"Pensil dan buku\" (merendahkan alat tulis yang dimiliki) dan Hiperbola: \"Di kelas yang berisik\" (melebih-lebihkan suasana kelas)",
+                    "Eufemisme: \"Keringat dan tawa\" (menghaluskan kata kelelahan) dan Ironi: \"Alat perjuangan\" (menyindir siswa yang malas belajar)",
+                    "Repetisi: \"Suatu hari nanti\" (mengulang kata penting) dan Sarkasme: \"Bersinar dalam gelap\" (mengejek teman yang gagal ujian)"
+                ]
+            },
+            // SOAL 43 - 50 (TERKAIT CERPEN "DI BALIK PINTU RUMAH")
+            {
+                id: 43,
+                category: "Analisis Cerpen: Di Balik Pintu Rumah",
+                showReading: "cerpen",
+                question: "Tema cerpen \"Di Balik Pintu Rumah\" di atas adalah tentang ...",
+                correct: "keluarga",
+                distractors: [
+                    "persahabatan di sekolah",
+                    "teknologi pertanian modern",
+                    "petualangan di kota besar"
+                ]
+            },
+            {
+                id: 44,
+                category: "Analisis Cerpen: Di Balik Pintu Rumah",
+                question: "Amanat yang ingin disampaikan melalui cerpen \"Di Balik Pintu Rumah\" tersebut adalah ...",
+                correct: "Keluarga merupakan fondasi yang memungkinkan kita untuk bangkit dan menghadapi segala rintangan",
+                distractors: [
+                    "Kekayaan materi adalah satu-satunya jaminan agar keluarga terhindar dari musibah banjir",
+                    "Pekerjaan di ladang sebaiknya ditinggalkan apabila sering mengalami kegagalan panen",
+                    "Anak-anak harus selalu menuntut ilmu di sekolah agar menjadi orang yang terkenal"
+                ]
+            },
+            {
+                id: 45,
+                category: "Analisis Cerpen: Di Balik Pintu Rumah",
+                question: "Alur cerita yang digunakan dalam cerpen tersebut adalah ..., dan sudut pandang cerpen tersebut adalah sudut pandang orang ...",
+                correct: "alur cerita maju; ketiga",
+                distractors: [
+                    "alur cerita mundur; pertama",
+                    "alur campuran; kedua",
+                    "alur sorot balik; pertama pelaku utama"
+                ]
+            },
+            {
+                id: 46,
+                category: "Analisis Cerpen: Di Balik Pintu Rumah",
+                question: "Latar tempat dan waktu yang terdapat pada cerpen tersebut adalah ...",
+                correct: "desa kecil (tempat); malam (waktu)",
+                distractors: [
+                    "ruang kelas (tempat); pagi hari (waktu)",
+                    "kota metropolitan (tempat); tengah hari (waktu)",
+                    "tepi pantai (tempat); sore hari (waktu)"
+                ]
+            },
+            {
+                id: 47,
+                category: "Analisis Cerpen: Di Balik Pintu Rumah",
+                question: "Siapa sajakah tokoh yang terdapat dalam cerpen tersebut beserta watak mereka yang tepat?",
+                correct: "Bapak (tegas, bertanggung jawab, dan bijak), Ibu (pengasih, sabar, optimis), Siti dan Rudi (penurut, ceria, optimis)",
+                distractors: [
+                    "Bapak (pemarah dan pesimis), Ibu (ceroboh dan mudah menyerah), Siti dan Rudi (malas dan pembangkang)",
+                    "Bapak (egois dan kikir), Ibu (tegas dan galak), Siti dan Rudi (pendiam dan penakut)",
+                    "Bapak (santai dan acuh tak acuh), Ibu (pemalu dan pendiam), Siti dan Rudi (nakal dan suka mengeluh)"
+                ]
+            },
+            {
+                id: 48,
+                category: "Analisis Cerpen: Di Balik Pintu Rumah",
+                question: "Susunan struktur cerpen \"Di Balik Pintu Rumah\" dengan menggunakan nomor paragraf yang benar adalah ...",
+                correct: "Orientasi → Paragraf 1, Komplikasi → Paragraf 2, Evaluasi → Paragraf 3, Resolusi dan Koda → Paragraf 4",
+                distractors: [
+                    "Komplikasi → Paragraf 1, Orientasi → Paragraf 2, Resolusi → Paragraf 3, Evaluasi → Paragraf 4",
+                    "Orientasi → Paragraf 1, Evaluasi → Paragraf 2, Komplikasi → Paragraf 3, Abstrak → Paragraf 4",
+                    "Abstrak → Paragraf 1, Komplikasi → Paragraf 2, Resolusi → Paragraf 3, Evaluasi → Paragraf 4"
+                ]
+            },
+            {
+                id: 49,
+                category: "Analisis Cerpen: Di Balik Pintu Rumah",
+                question: "Majas hiperbola yang digunakan dalam cerpen tersebut beserta maknanya adalah ...",
+                correct: "\"Keluarga ini tidak memiliki banyak, tetapi mereka kaya akan cinta dan kebersamaan.\" (Kaya akan cinta arti konotasinya sangat saling mengasihi)",
+                distractors: [
+                    "\"Setiap malam, setelah seharian bekerja di ladang, mereka berkumpul di ruang tamu yang hangat.\" (Ruang tamu yang hangat berarti suhu ruangan sangat panas)",
+                    "\"Suatu hari, Bapak mendapat kabar bahwa lahan mereka terkena banjir.\" (Terkena banjir berarti air meluap hingga ke atap rumah)",
+                    "\"Akhirnya, saat panen tiba, hasil jerih payah mereka berbuah manis.\" (Berbuah manis berarti seluruh tanaman berasa seperti gula)"
+                ]
+            },
+            {
+                id: 50,
+                category: "Analisis Cerpen: Di Balik Pintu Rumah",
+                question: "Bentuk kalimat tidak langsung yang tepat dari kalimat langsung pada paragraf kedua (\"Kita punya satu sama lain, itu yang terpenting\" katanya) adalah ...",
+                correct: "Ibunya mengingatkan bahwa mereka punya satu sama lain, itulah hal yang terpenting.",
+                distractors: [
+                    "Ibu berkata, \"Kita punya satu sama lain, itu yang terpenting.\"",
+                    "Ibunya bertanya apakah mereka masih memiliki satu sama lain yang terpenting.",
+                    "Mereka mengingatkan Ibu bahwa kita punya satu sama lain yang paling penting."
+                ]
+            }
+        ];
+
+        // =========================================================================
+        // 3. STATE APLIKASI KUIS
+        // =========================================================================
+        let quizQuestions = [];
+        let userAnswers = {}; // { [questionId]: optionIndex }
+        let isSubmitted = false;
+
+        // Fungsi mengacak array (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Inisialisasi / Persiapan Soal dengan Opsi Teracak
+        function prepareQuestions() {
+            quizQuestions = RAW_QUESTIONS.map(q => {
+                const allOptions = [
+                    { text: q.correct, isCorrect: true },
+                    ...q.distractors.map(d => ({ text: d, isCorrect: false }))
+                ];
+                const shuffledOptions = shuffleArray(allOptions);
+                const correctIndex = shuffledOptions.findIndex(opt => opt.isCorrect);
+                return {
+                    ...q,
+                    options: shuffledOptions.map(o => o.text),
+                    correctIndex: correctIndex
+                };
+            });
+        }
+
+        // =========================================================================
+        // 4. RENDER UI SOAL & NAVIGASI
+        // =========================================================================
+        function renderQuiz() {
+            const container = document.getElementById('questions-container');
+            const navGrid = document.getElementById('nav-grid');
+            const instantCheck = document.getElementById('instant-check-toggle').checked;
+
+            container.innerHTML = '';
+            navGrid.innerHTML = '';
+
+            const letters = ['A', 'B', 'C', 'D'];
+
+            quizQuestions.forEach((q, idx) => {
+                // Sisipkan Bacaan Puisi sebelum No. 37 atau Bacaan Cerpen sebelum No. 43
+                if (q.showReading === 'puisi') {
+                    const readingCard = document.createElement('div');
+                    readingCard.className = 'mb-2';
+                    readingCard.innerHTML = READING_TEXTS.puisi.html;
+                    container.appendChild(readingCard);
+                } else if (q.showReading === 'cerpen') {
+                    const readingCard = document.createElement('div');
+                    readingCard.className = 'mb-2';
+                    readingCard.innerHTML = READING_TEXTS.cerpen.html;
+                    container.appendChild(readingCard);
+                }
+
+                const selectedIdx = userAnswers[q.id];
+                const hasAnswered = selectedIdx !== undefined;
+                const showFeedback = hasAnswered && (instantCheck || isSubmitted);
+                const isCorrect = hasAnswered && selectedIdx === q.correctIndex;
+
+                // Buat Kartu Soal
+                const card = document.createElement('article');
+                card.id = `question-card-${q.id}`;
+                card.className = `bg-white rounded-2xl border p-5 sm:p-6 shadow-sm transition-all ${
+                    showFeedback
+                        ? (isCorrect ? 'border-emerald-300 ring-1 ring-emerald-200' : 'border-rose-300 ring-1 ring-rose-200')
+                        : (hasAnswered ? 'border-indigo-300' : 'border-slate-200')
+                }`;
+
+                // Header Kartu Soal
+                let statusBadge = '';
+                if (showFeedback) {
+                    if (isCorrect) {
+                        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">✓ Benar</span>`;
+                    } else {
+                        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">✕ Salah</span>`;
+                    }
+                } else if (hasAnswered) {
+                    statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">Terjawab</span>`;
+                }
+
+                // Opsi Pilihan Ganda
+                const optionsHtml = q.options.map((optText, optIdx) => {
+                    const isSelected = selectedIdx === optIdx;
+                    const isThisCorrect = optIdx === q.correctIndex;
+                    
+                    let btnClass = 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700';
+                    let badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
+                    let iconRight = '';
+
+                    if (showFeedback) {
+                        if (isThisCorrect) {
+                            btnClass = 'border-emerald-500 bg-emerald-50/90 text-emerald-950 font-semibold';
+                            badgeClass = 'bg-emerald-600 text-white border-emerald-600';
+                            iconRight = `<span class="ml-auto text-emerald-600 font-bold text-sm shrink-0">✓ Kunci</span>`;
+                        } else if (isSelected && !isThisCorrect) {
+                            btnClass = 'border-rose-500 bg-rose-50/90 text-rose-950';
+                            badgeClass = 'bg-rose-600 text-white border-rose-600';
+                            iconRight = `<span class="ml-auto text-rose-600 font-bold text-sm shrink-0">✕ Pilihanmu</span>`;
+                        } else {
+                            btnClass = 'border-slate-200 bg-slate-50/50 text-slate-400 opacity-75';
+                        }
+                    } else if (isSelected) {
+                        btnClass = 'border-indigo-600 bg-indigo-50/80 text-indigo-950 font-semibold ring-1 ring-indigo-500';
+                        badgeClass = 'bg-indigo-600 text-white border-indigo-600';
+                    }
+
+                    const disabledClass = isSubmitted ? 'disabled-option cursor-default' : 'cursor-pointer';
+
+                    return `
+                        <button type="button"
+                            onclick="selectOption(${q.id}, ${optIdx})"
+                            class="option-card w-full text-left p-3.5 rounded-xl border flex items-start gap-3 ${btnClass} ${disabledClass}">
+                            <span class="w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5 ${badgeClass}">
+                                ${letters[optIdx]}
+                            </span>
+                            <span class="text-sm sm:text-[15px] leading-snug flex-1">${optText}</span>
+                            ${iconRight}
+                        </button>
+                    `;
+                }).join('');
+
+                // Kotak Penjelasan Kunci jika salah
+                let explanationBox = '';
+                if (showFeedback && !isCorrect) {
+                    explanationBox = `
+                        <div class="mt-4 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs sm:text-sm text-amber-950">
+                            <span class="font-bold text-amber-900">Kunci Jawaban (${letters[q.correctIndex]}):</span>
+                            <span>${q.options[q.correctIndex]}</span>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-extrabold text-sm flex items-center justify-center shadow-sm">
+                                ${q.id}
+                            </span>
+                            <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
+                                ${q.category}
+                            </span>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    <h3 class="text-base sm:text-[17px] font-bold text-slate-900 leading-relaxed mb-4">
+                        ${q.question}
+                    </h3>
+                    <div class="space-y-2.5">
+                        ${optionsHtml}
+                    </div>
+                    ${explanationBox}
+                `;
+
+                container.appendChild(card);
+
+                // Buat Tombol Navigasi Nomor di Sidebar
+                const navBtn = document.createElement('button');
+                navBtn.type = 'button';
+                navBtn.textContent = q.id;
+                navBtn.onclick = () => scrollToQuestion(q.id);
+
+                let navClass = 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200';
+                if (showFeedback) {
+                    navClass = isCorrect
+                        ? 'bg-emerald-500 text-white border-emerald-600 font-bold'
+                        : 'bg-rose-500 text-white border-rose-600 font-bold';
+                } else if (hasAnswered) {
+                    navClass = 'bg-indigo-600 text-white border-indigo-700 font-bold';
+                }
+
+                navBtn.className = `h-8 rounded-lg border text-xs transition flex items-center justify-center ${navClass}`;
+                navGrid.appendChild(navBtn);
+            });
+
+            updateStats();
+        }
+
+        // =========================================================================
+        // 5. LOGIKA INTERAKSI & AUTO-SCORE
+        // =========================================================================
+        function selectOption(questionId, optionIndex) {
+            if (isSubmitted) {
+                showToast("Kuis sudah selesai dikumpulkan. Klik 'Ulangi Kuis' untuk mengerjakan kembali.");
+                return;
+            }
+            userAnswers[questionId] = optionIndex;
+            renderQuiz();
+        }
+
+        function updateStats() {
+            const total = quizQuestions.length;
+            const answeredCount = Object.keys(userAnswers).length;
+            let correctCount = 0;
+
+            quizQuestions.forEach(q => {
+                if (userAnswers[q.id] !== undefined && userAnswers[q.id] === q.correctIndex) {
+                    correctCount++;
+                }
+            });
+
+            const score = Math.round((correctCount / total) * 100);
+            const progressPercent = (answeredCount / total) * 100;
+
+            document.getElementById('answered-counter').textContent = `${answeredCount} / ${total}`;
+            document.getElementById('live-score-value').textContent = score;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+        }
+
+        function submitQuiz() {
+            const total = quizQuestions.length;
+            const answeredCount = Object.keys(userAnswers).length;
+
+            if (answeredCount < total && !isSubmitted) {
+                const unanswered = total - answeredCount;
+                showToast(`Masih ada ${unanswered} soal belum dijawab, namun skor akhir tetap dihitung!`);
+            }
+
+            isSubmitted = true;
+            renderQuiz();
+
+            // Hitung hasil akhir
+            let correctCount = 0;
+            quizQuestions.forEach(q => {
+                if (userAnswers[q.id] !== undefined && userAnswers[q.id] === q.correctIndex) {
+                    correctCount++;
+                }
+            });
+            const wrongCount = total - correctCount;
+            const finalScore = Math.round((correctCount / total) * 100);
+
+            const studentName = document.getElementById('student-name').value.trim();
+            const studentClass = document.getElementById('student-class').value.trim();
+
+            const greetingEl = document.getElementById('result-student-greeting');
+            if (studentName) {
+                greetingEl.textContent = `Selamat, ${studentName}${studentClass ? ` (${studentClass})` : ''}!`;
+            } else {
+                greetingEl.textContent = `Hasil Evaluasi Kuis SA1`;
+            }
+
+            let feedback = "";
+            if (finalScore >= 90) {
+                feedback = "Luar biasa! Pemahamanmu terhadap materi Cerpen dan Puisi untuk SA1 sangat matang.";
+            } else if (finalScore >= 75) {
+                feedback = "Bagus sekali! Kamu sudah menguasai sebagian besar materi, tinjau kembali beberapa nomor yang masih keliru.";
+            } else if (finalScore >= 60) {
+                feedback = "Cukup baik! Pelajari kembali kunci jawaban yang ditandai merah di bawah ini agar lebih siap menghadapi SA1.";
+            } else {
+                feedback = "Tetap semangat! Silakan baca pembahasan kunci jawaban di bawah dan ulangi kuis untuk berlatih kembali.";
+            }
+
+            document.getElementById('result-feedback-text').textContent = feedback;
+            document.getElementById('final-score-big').textContent = finalScore;
+            document.getElementById('final-correct-count').textContent = correctCount;
+            document.getElementById('final-wrong-count').textContent = wrongCount;
+
+            const banner = document.getElementById('result-banner');
+            banner.classList.remove('hidden');
+            banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function resetQuiz() {
+            userAnswers = {};
+            isSubmitted = false;
+            document.getElementById('result-banner').classList.add('hidden');
+            prepareQuestions();
+            renderQuiz();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast("Kuis telah direset dan opsi jawaban telah diacak ulang.");
+        }
+
+        function shuffleAllOptions() {
+            if (Object.keys(userAnswers).length > 0 && !isSubmitted) {
+                // Pertahankan jawaban yang sudah dipilih berdasarkan teks opsi
+                const selectedTexts = {};
+                quizQuestions.forEach(q => {
+                    if (userAnswers[q.id] !== undefined) {
+                        selectedTexts[q.id] = q.options[userAnswers[q.id]];
+                    }
+                });
+
+                prepareQuestions();
+
+                userAnswers = {};
+                quizQuestions.forEach(q => {
+                    if (selectedTexts[q.id]) {
+                        const newIdx = q.options.findIndex(opt => opt === selectedTexts[q.id]);
+                        if (newIdx !== -1) userAnswers[q.id] = newIdx;
+                    }
+                });
+            } else {
+                prepareQuestions();
+            }
+            renderQuiz();
+            showToast("Urutan pilihan A, B, C, D berhasil diacak!");
+        }
+
+        function scrollToQuestion(id) {
+            const el = document.getElementById(`question-card-${id}`);
+            if (el) {
+                const yOffset = -96;
+                const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        }
+
+        // =========================================================================
+        // 6. MODAL BACAAN & TOAST HELPER
+        // =========================================================================
+        function openReadingModal(type) {
+            const modal = document.getElementById('reading-modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+
+            title.textContent = READING_TEXTS[type].title;
+            body.innerHTML = READING_TEXTS[type].html;
+            modal.classList.remove('hidden');
+        }
+
+        function closeReadingModal() {
+            document.getElementById('reading-modal').classList.add('hidden');
+        }
+
+        // Tutup modal jika klik di luar area konten
+        document.getElementById('reading-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeReadingModal();
+        });
+
+        let toastTimer;
+        function showToast(msg) {
+            const toast = document.getElementById('toast-box');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('hidden');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3200);
+        }
+
+        // Event listener toggle mode langsung cek jawaban
+        document.getElementById('instant-check-toggle').addEventListener('change', () => {
+            renderQuiz();
+        });
+
+        // Mulai aplikasi saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            prepareQuestions();
+            renderQuiz();
+        });
+    </script>
+</body>
+</html>
